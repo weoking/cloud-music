@@ -1,12 +1,34 @@
-import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle} from 'react';
+import React, { forwardRef, useState, useEffect, useRef, useImperativeHandle, useMemo} from 'react';
 import PropTypes from 'prop-types';
 import BScroll from 'better-scroll';
 import styled from 'styled-components';
+import Loading from '../loading/index';
+import LoadingV2 from '../loading-v2/index';
+import { debounce } from '../../api/utils';
 
 const ScrollContainer = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
+`
+
+const PullUpLoading = styled.div`
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 5px;
+  width: 60px;
+  height: 60px;
+  margin: auto;
+  z-index: 100;
+`
+
+const PullDownLoading = styled.div`
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  height: 60px;
+  margin: auto;
+  z-index: 100;
 `
 
 const Scroll = forwardRef((props, ref) => {
@@ -15,6 +37,14 @@ const Scroll = forwardRef((props, ref) => {
 
   const { direction, click, refresh, pullUpLoading, pullDownLoading, bounceTop, bounceBottom } = props;
   const { pullUp, pullDown, onScroll } = props
+
+  let pullUpDebounce = useMemo(() => {
+    return debounce(pullUp, 300)
+  }, [pullUp])
+
+  let pullDownDebounce = useMemo(() => {
+    return debounce(pullDown, 300)
+  }, [pullDown])
 
   // 创建scroll实例
   useEffect(() => {
@@ -57,26 +87,26 @@ const Scroll = forwardRef((props, ref) => {
     if (!bScroll || !pullUp) return;
     bScroll.on('scrollEnd', () => {
       if (bScroll.y <= bScroll.maxScrollY + 100) {
-        pullUp();
+        pullUpDebounce();
       }
     });
     return () => {
       bScroll.off('scrollEnd');
     }
-  }, [pullUp, bScroll]);
+  }, [pullUpDebounce, bScroll, pullUp]);
 
   // 调用下拉刷新的函数
   useEffect(() => {
     if (!bScroll || !pullDown) return;
     bScroll.on('touchEnd', (pos) => {
       if (pos.y > 50) {
-        pullDown();
+        pullDownDebounce();
       }
     });
     return () => {
       bScroll.off('touchEnd');
     }
-  }, [pullDown, bScroll]);
+  }, [pullDownDebounce, bScroll, pullDown]);
 
   // 向外暴露方法
   useImperativeHandle(ref, () => ({
@@ -94,9 +124,17 @@ const Scroll = forwardRef((props, ref) => {
     }
   }));
 
+
+
+
+  const PullUpdisplayStyle = pullUpLoading ? { display: "" } : { display: "none" };
+  const PullDowndisplayStyle = pullDownLoading ? { display: "" } : { display: "none" };
+
   return (
     <ScrollContainer ref={scrollContainerRef}>
       {props.children}
+      <PullUpLoading style={PullUpdisplayStyle}><Loading></Loading></PullUpLoading>
+      <PullDownLoading style={PullDowndisplayStyle}><LoadingV2></LoadingV2></PullDownLoading>
     </ScrollContainer>
   );
 

@@ -1,12 +1,13 @@
 import React, { useEffect }from 'react';
 import Slider from '../../components/slider';
 import RecommendList from '../../components/list';
-import Scroll from '../../components/scroll';
+import Scroll from '../../baseUI/scroll';
 import { Content } from './style';
 import { connect } from 'react-redux';
 import * as actionTypes from './store/actionCreators';
 import { forceCheck } from 'react-lazyload';
 import Loading from '../../baseUI/loading/index';
+import { renderRoutes } from 'react-router-config';
 
 function Recommend(props) {
   const { bannerList, recommendList, songsCount, enterLoading} = props;
@@ -34,6 +35,7 @@ function Recommend(props) {
         </div>
       </Scroll>
       {enterLoading ? <Loading></Loading> : null}
+      { renderRoutes(props.route.routes) }
     </Content>
   )
 }

@@ -31,7 +31,7 @@ const LoadingWrapper = styled.div`
   }
 `
 
-function Loading() {
+function Loading(props) {
   return (
     <LoadingWrapper>
       <div></div>
