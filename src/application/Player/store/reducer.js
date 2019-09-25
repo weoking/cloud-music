@@ -49,6 +49,10 @@ const handleInsertSong = (state, song) => {
   })
 }
 
+const handleDeleteSong = (state, song) => {
+
+}
+
 export default (state = defaultState, action) => {
   switch(action.type) {
     case actionTypes.SET_CURRENT_SONG:

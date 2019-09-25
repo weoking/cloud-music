@@ -3,12 +3,15 @@ import { SongList, SongItem } from "./style";
 import { connect } from 'react-redux';
 import { ONE_PAGE_COUNT } from '../../api/config';
 import { getName } from '../../api/utils';
+import { changePlayList, changeCurrentIndex, changeSequecePlayList } from './../../application/Player/store/actionCreators';
 
 const SongsList = React.forwardRef((props, refs) => {
 
   const [startIndex, setStartIndex] = useState(0);
 
   const { songs, collectCount, showCollect, loading = false, usePageSplit } = props;
+
+  const {changePlayListDispatch, changeCurrentIndexDispatch, changeSequecePlayListDispatch} = props;
 
   const { musicAnimation } = props;
   const totalCount = songs.length;
@@ -21,7 +24,10 @@ const SongsList = React.forwardRef((props, refs) => {
   }, [loading, startIndex, totalCount]);
 
   const selectItem = (e, index) => {
-    
+    changePlayListDispatch(songs);
+    changeSequecePlayListDispatch(songs);
+    changeCurrentIndexDispatch(index);
+    // musicAnimation(e.nativeEvent.clientX, e.nativeEvent.clientY);
   }
 
   let songList = (list) => {
@@ -44,7 +50,7 @@ const SongsList = React.forwardRef((props, refs) => {
     }
     return res;
   };
-  
+
   const collect = (count) => {
     return (
       <div className="add_list">
@@ -70,4 +76,25 @@ const SongsList = React.forwardRef((props, refs) => {
   )
 });
 
-export default React.memo(SongsList);
+const mapStateToProps = (state) => ({
+  fullScreen: state.getIn(['player', 'fullScreen']),
+  playing: state.getIn(['player', 'playing']),
+  currentSong: state.getIn(['player', 'currentSong']),
+  scrollY: state.getIn(['album', 'scrollY'])
+})
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    changePlayListDispatch(data) {
+      dispatch(changePlayList(data));
+    },
+    changeCurrentIndexDispatch(data) {
+      dispatch(changeCurrentIndex(data));
+    },
+    changeSequecePlayListDispatch(data) {
+      dispatch(changeSequecePlayList(data));
+    }
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(SongsList));

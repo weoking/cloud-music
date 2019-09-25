@@ -57,3 +57,5 @@ export const findIndex = (song, list) => {
     return song.id === item.id;
   });
 };
+
+export const isEmptyObject = obj => !obj || Object.keys(obj).length === 0;
