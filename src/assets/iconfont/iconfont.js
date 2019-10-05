@@ -3,12 +3,12 @@ import { createGlobalStyle } from 'styled-components';
 export const IconStyle = createGlobalStyle`
 @font-face {
   font-family: 'iconfont';  /* project id 1380284 */
-  src: url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.eot');
-  src: url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.eot?#iefix') format('embedded-opentype'),
-  url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.woff2') format('woff2'),
-  url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.woff') format('woff'),
-  url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.ttf') format('truetype'),
-  url('//at.alicdn.com/t/font_1380284_uft4s87z0yf.svg#iconfont') format('svg');
+  src: url('//at.alicdn.com/t/font_1380284_vaojskyxk98.eot');
+  src: url('//at.alicdn.com/t/font_1380284_vaojskyxk98.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_1380284_vaojskyxk98.woff2') format('woff2'),
+  url('//at.alicdn.com/t/font_1380284_vaojskyxk98.woff') format('woff'),
+  url('//at.alicdn.com/t/font_1380284_vaojskyxk98.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_1380284_vaojskyxk98.svg#iconfont') format('svg');
 }
 
 .iconfont {
