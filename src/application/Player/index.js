@@ -10,8 +10,10 @@ import {
   changeFullScreen
 } from "./store/actionCreators";
 import { connect } from 'react-redux';
-import { isEmptyObject, getSongUrl} from '../../api/utils';
+import { isEmptyObject, getSongUrl, findIndex, shuffle} from '../../api/utils';
 import NormalPlayer from "./normalPlayer";
+import { playMode } from '../../api/config';
+import Toast from '../../baseUI/Toast/index';
 
 function Player(props) {
   const [currentTime, setCurrentTime] = useState(0);
@@ -27,7 +29,7 @@ function Player(props) {
     currentIndex,
     playList:immutablePlayList,
     mode,
-    sequencePlayList,
+    sequencePlayList: immutableSequencePlayList,
     fullScreen
   } = props;
 
@@ -43,12 +45,18 @@ function Player(props) {
 
   const playList = immutablePlayList.toJS();
   const currentSong = immutableCurrentSong.toJS();
+  const sequencePlayList = immutableSequencePlayList.toJS();
 
   const [preSong, setPreSong] =useState({});
 
   const audioRef = useRef();
+  const toastRef = useRef();
 
   const songReady = useRef(true);
+
+  useEffect(() => {
+    changeCurrentIndexDispatch(0);
+  }, [changeCurrentIndexDispatch])
 
   useEffect(() => {
     if (
@@ -73,7 +81,7 @@ function Player(props) {
     togglePlayingDispatch(true);
     setCurrentTime(0);
     setDuration((current.dt / 1000) | 0);
-  }, [currentIndex, playList]);
+  }, [changeCurrentDispatch, currentIndex, playList, preSong.id, togglePlayingDispatch]);
 
   useEffect(() => {
     playing ? audioRef.current.play() : audioRef.current.pause();
@@ -89,14 +97,80 @@ function Player(props) {
   }
 
   const handleEnd = () => {
-    handleNext();
+    if (mode === playMode.loop) {
+      handleLoop();
+    } else {
+      handleNext();
+    }
   }
 
+  // 切换到下一首
   const handleNext = () => {
+    if (playList.length === 1) {
+      handleLoop();
+      return;
+    }
+    if (mode === playMode.loop) {
+      handleLoop();
+      return;
+    }
     let index = currentIndex + 1;
     if (index === playList.length) index = 0;
     if (!playing) togglePlayingDispatch(true);
     changeCurrentIndexDispatch(index);
+  }
+
+  // 一首歌循环
+  const handleLoop = () => {
+    audioRef.current.currentTime = 0;
+    changePlayingState(true);
+    audioRef.current.play();
+  }
+
+  // 切换到上一首
+  const handlePrev = () => {
+    if (playList.length === 1) {
+      handleLoop();
+      return;
+    }
+    let index = currentIndex - 1;
+    if (index < 0) index = playList.length - 1;
+    if (!playing) togglePlayingDispatch(true);
+    changeCurrentIndexDispatch(index);
+  }
+
+  const onProgressChange = curPercent => {
+    const newTime = curPercent * duration;
+    setCurrentTime(newTime);
+    audioRef.current.currentTime = newTime;
+    if (!playing) {
+      togglePlayingDispatch(true);
+    }
+  };
+
+  // 切换播放模式
+  const changeMode = () => {
+    let newMode = (mode + 1) % 3;
+    if (newMode === 0) {
+      // 顺序模式
+      changePlayListDispatch(sequencePlayList);
+      let index = findIndex(currentSong, sequencePlayList);
+      changeCurrentIndexDispatch(index);
+      setModeText("顺序循环");
+    } else if (newMode === 1) {
+      // 单曲循环
+      changePlayListDispatch(sequencePlayList);
+      setModeText("单曲循环");
+    } else if (newMode === 2) {
+      // 随机播放
+      let newList = shuffle(sequencePlayList);
+      let index = findIndex(currentSong, newList);
+      changePlayListDispatch(newList);
+      changeCurrentIndexDispatch(index);
+      setModeText("随机播放");
+    }
+    changeModeDispatch(newMode);
+    toastRef.current.show();
   }
 
   return (
@@ -106,6 +180,16 @@ function Player(props) {
           song={currentSong}
           fullScreen={fullScreen}
           toggleFullScreen={toggleFullScreenDispatch}
+          playing={playing}
+          clickPlaying={clickPlaying}
+          duration={duration}
+          currentTime={currentTime}
+          percent={percent}
+          onProgressChange={onProgressChange}
+          handlePrev={handlePrev}
+          handleNext={handleNext}
+          mode={mode}
+          changeMode={changeMode}
         ></NormalPlayer>
       )}
       {isEmptyObject(currentSong) ? null : (
@@ -113,7 +197,6 @@ function Player(props) {
           playing={playing}
           full={fullScreen}
           song={currentSong}
-          playing={playing}
           percent={percent}
           clickPlaying={clickPlaying}
           setFullScreen={toggleFullScreenDispatch}
@@ -129,6 +212,7 @@ function Player(props) {
         // onError={handleError}
       >
       </audio>
+      <Toast text={modeText} ref={toastRef}></Toast>
     </div>
   )
 }

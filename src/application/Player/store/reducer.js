@@ -6,7 +6,7 @@ import { findIndex } from '../../../api/utils';
 const defaultState = fromJS({
   fullScreen: false,
   playing: false,
-  sequencePlayerList: [],
+  sequencePlayList: [],
   playList: [],
   mode: playMode.sequence,
   currentIndex: -1,
